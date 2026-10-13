@@ -14,4 +14,18 @@ describe("App routing", () => {
 
     expect(matches.at(-1)?.routeId).not.toBe(rootRouteId);
   });
+
+  it.each([
+    ["/explore", "/explore"],
+    ["/login", "/login"],
+    ["/signup", "/signup"],
+    ["/write", "/write"],
+    ["/dashboard", "/dashboard"],
+    ["/post/intentional-living", "/post/$postId"],
+    ["/edit/draft-noticing", "/edit/$postId"],
+    ["/profile/emma", "/profile/$userId"],
+  ])("matches BlogSpace page %s", (path, routeId) => {
+    const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
+    expect(router.matchRoutes(path).at(-1)?.routeId).toBe(routeId);
+  });
 });
