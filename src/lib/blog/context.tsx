@@ -50,7 +50,13 @@ export function BlogProvider({ children }: { children: ReactNode }) {
           PostsAPI.fetchPosts(),
           AuthAPI.getSession(),
         ]);
-        if (fetchedPosts.length) setPosts(fetchedPosts);
+        if (fetchedPosts.length) {
+          const fetchedPostIds = new Set(fetchedPosts.map((post) => post.id));
+          setPosts([
+            ...fetchedPosts,
+            ...initialPosts.filter((post) => !fetchedPostIds.has(post.id)),
+          ]);
+        }
         if (session?.user) {
           setUser(sessionToProfile(session.user));
           const interactions = await PostsAPI.fetchUserInteractions(session.user.id);

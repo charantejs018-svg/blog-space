@@ -20,7 +20,9 @@ export function Feed({ explore = false }: { explore?: boolean }) {
         `${p.title} ${p.excerpt} ${p.category}`.toLowerCase().includes(search.toLowerCase()) &&
         (explore || category !== "All stories" || search || p.id !== featured?.id),
     )
-    .sort((a, b) => (sort === "popular" ? b.likes - a.likes : 0));
+    .sort((a, b) =>
+      sort === "popular" ? b.likes - a.likes : Date.parse(b.date) - Date.parse(a.date),
+    );
   return (
     <main className="page-container home-page">
       {explore ? (
