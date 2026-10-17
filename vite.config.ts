@@ -14,9 +14,17 @@ export default defineConfig({
   },
   nitro: {
     preset: "vercel",
-    bundledStorage: [],
-    externals: {
-      inline: ["tslib"],
+    rollupConfig: {
+      external: [],
     },
+    noExternal: [
+      "tslib",
+      "@supabase/functions-js",
+      "@supabase/supabase-js",
+      "@supabase/auth-js",
+      "@supabase/postgrest-js",
+      "@supabase/realtime-js",
+      "@supabase/storage-js",
+    ],
   },
 });
