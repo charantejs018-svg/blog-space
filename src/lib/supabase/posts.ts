@@ -1,5 +1,6 @@
 import { supabase } from "./client";
 import type { Post, Comment } from "@/lib/blog/data";
+import { covers } from "@/lib/blog/data";
 
 // ── Posts ──────────────────────────────────────────────────────────────────
 
@@ -29,7 +30,7 @@ export async function upsertPost(post: Post, userId: string): Promise<Post> {
     excerpt: post.excerpt,
     content: post.content,
     category: post.category,
-    cover: post.cover,
+    cover: coverToKey(post.cover),
     author_id: userId,
     author_name: post.authorName ?? "",
     read_time: post.readTime,
@@ -93,6 +94,27 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
+/** Map a stored cover value (hashed URL or bare filename) to the imported asset URL. */
+function resolveCover(raw: string): string {
+  // Already a hashed Vite asset URL — use as-is
+  if (!raw || raw.startsWith("http") || raw.startsWith("/assets/")) return raw;
+  // Strip any leading path, keep just the filename without extension
+  const filename = raw.split("/").pop()?.replace(/\.[^.]+$/, "") ?? "";
+  return (covers as Record<string, string>)[filename] ?? raw;
+}
+
+/** Convert a cover value (hashed URL or path) to a stable filename key for DB storage. */
+function coverToKey(value: string): string {
+  const coversMap = covers as Record<string, string>;
+  // If it's already a key, return it
+  if (coversMap[value]) return value;
+  // If it's a hashed URL, find the matching key
+  const entry = Object.entries(coversMap).find(([, v]) => v === value);
+  if (entry) return entry[0];
+  // Fallback: strip path and extension
+  return value.split("/").pop()?.replace(/\.[^.]+$/, "") ?? value;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function dbToPost(row: any): Post {
   return {
@@ -101,7 +123,7 @@ function dbToPost(row: any): Post {
     excerpt: row.excerpt,
     content: row.content,
     category: row.category,
-    cover: row.cover,
+    cover: resolveCover(row.cover),
     authorId: row.author_id,
     authorName: row.author_name ?? undefined,
     date: formatDate(row.created_at),

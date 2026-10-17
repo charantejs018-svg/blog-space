@@ -3,7 +3,7 @@ import { resolve } from "path";
 
 const funcDir = resolve(".vercel/output/functions/__server.func");
 const libsDir = resolve(funcDir, "_libs");
-const tslibSrc = resolve(funcDir, "node_modules/tslib");
+const tslibSrc = resolve("node_modules/tslib");
 const tslibDest = resolve(libsDir, "node_modules/tslib");
 
 if (existsSync(libsDir) && existsSync(tslibSrc)) {
@@ -12,4 +12,6 @@ if (existsSync(libsDir) && existsSync(tslibSrc)) {
   console.log("✓ tslib copied into _libs/node_modules/");
 } else {
   console.warn("⚠ Could not find _libs or tslib — skipping fix");
+  console.warn("  libsDir exists:", existsSync(libsDir));
+  console.warn("  tslibSrc exists:", existsSync(tslibSrc));
 }
