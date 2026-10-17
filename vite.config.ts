@@ -14,5 +14,9 @@ export default defineConfig({
   },
   nitro: {
     preset: "vercel",
+    bundledStorage: [],
+    externals: {
+      inline: ["tslib"],
+    },
   },
 });
