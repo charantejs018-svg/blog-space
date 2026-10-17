@@ -18,6 +18,7 @@ import { Route as WriteRouteImport } from './routes/write'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminLayoutRouteImport } from './routes/admin/_layout'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as EditPostIdRouteImport } from './routes/edit.$postId'
 import { Route as PostPostIdRouteImport } from './routes/post.$postId'
 import { Route as ProfileUserIdRouteImport } from './routes/profile.$userId'
@@ -67,6 +68,11 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
   path: '/admin/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EditPostIdRoute = EditPostIdRouteImport.update({
   id: '/edit/$postId',
   path: '/edit/$postId',
@@ -92,6 +98,7 @@ export interface FileRoutesByFullPath {
   '/write': typeof WriteRoute
   '/admin': typeof AdminLayoutRoute
   '/admin/login': typeof AdminLoginRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/edit/$postId': typeof EditPostIdRoute
   '/post/$postId': typeof PostPostIdRoute
   '/profile/$userId': typeof ProfileUserIdRoute
@@ -106,6 +113,7 @@ export interface FileRoutesByTo {
   '/write': typeof WriteRoute
   '/admin': typeof AdminIndexRoute
   '/admin/login': typeof AdminLoginRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/edit/$postId': typeof EditPostIdRoute
   '/post/$postId': typeof PostPostIdRoute
   '/profile/$userId': typeof ProfileUserIdRoute
@@ -120,6 +128,7 @@ export interface FileRoutesById {
   '/write': typeof WriteRoute
   '/admin/_layout': typeof AdminLayoutRoute
   '/admin/login': typeof AdminLoginRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/edit/$postId': typeof EditPostIdRoute
   '/post/$postId': typeof PostPostIdRoute
   '/profile/$userId': typeof ProfileUserIdRoute
@@ -136,6 +145,7 @@ export interface FileRouteTypes {
     | '/write'
     | '/admin'
     | '/admin/login'
+    | '/auth/callback'
     | '/edit/$postId'
     | '/post/$postId'
     | '/profile/$userId'
@@ -150,6 +160,7 @@ export interface FileRouteTypes {
     | '/write'
     | '/admin'
     | '/admin/login'
+    | '/auth/callback'
     | '/edit/$postId'
     | '/post/$postId'
     | '/profile/$userId'
@@ -163,6 +174,7 @@ export interface FileRouteTypes {
     | '/write'
     | '/admin/_layout'
     | '/admin/login'
+    | '/auth/callback'
     | '/edit/$postId'
     | '/post/$postId'
     | '/profile/$userId'
@@ -178,6 +190,7 @@ export interface RootRouteChildren {
   WriteRoute: typeof WriteRoute
   AdminLayoutRoute: typeof AdminLayoutRoute
   AdminLoginRoute: typeof AdminLoginRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
   EditPostIdRoute: typeof EditPostIdRoute
   PostPostIdRoute: typeof PostPostIdRoute
   ProfileUserIdRoute: typeof ProfileUserIdRoute
@@ -249,6 +262,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/edit/$postId': {
       id: '/edit/$postId'
       path: '/edit/$postId'
@@ -282,6 +302,7 @@ const rootRouteChildren: RootRouteChildren = {
   WriteRoute: WriteRoute,
   AdminLayoutRoute: AdminLayoutRoute,
   AdminLoginRoute: AdminLoginRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
   EditPostIdRoute: EditPostIdRoute,
   PostPostIdRoute: PostPostIdRoute,
   ProfileUserIdRoute: ProfileUserIdRoute,

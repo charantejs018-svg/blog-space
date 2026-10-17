@@ -9,4 +9,7 @@ if (!url || !key) {
   );
 }
 
-export const supabase = createClient(url ?? "", key ?? "");
+const PLACEHOLDER_URL = "https://placeholder.supabase.co";
+const PLACEHOLDER_KEY = "placeholder-key";
+
+export const supabase = createClient(url || PLACEHOLDER_URL, key || PLACEHOLDER_KEY);

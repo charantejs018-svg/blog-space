@@ -15,7 +15,9 @@ export function Avatar({ author, small = false }: { author: UserProfile; small?:
   );
 }
 export function AuthorLine({ post, light = false }: { post: Post; light?: boolean }) {
-  const author = authors.find((a) => a.id === post.authorId) ?? authors[0];
+  const author = authors.find((a) => a.id === post.authorId) ?? (
+    post.authorName ? { name: post.authorName, initials: post.authorName.slice(0, 2).toUpperCase(), tone: "violet", role: "BlogSpace member" } : authors[0]
+  );
   return (
     <div className={`author-line ${light ? "author-light" : ""}`}>
       <Link to="/profile/$userId" params={{ userId: author.id }}>
@@ -200,14 +202,14 @@ export function StoryActions({ post }: { post: Post }) {
     </div>
   );
 }
-export function EmptyState({ text = "No stories found." }: { text?: string }) {
+export function EmptyState({ text = "No stories found.", action }: { text?: string; action?: { label: string; to: string } }) {
   return (
     <div className="empty-state">
       <Feather />
       <h3>{text}</h3>
       <Button variant="link" asChild>
-        <Link to="/explore">
-          Explore stories <ArrowRight />
+        <Link to={action?.to ?? "/explore"}>
+          {action?.label ?? "Explore stories"} <ArrowRight />
         </Link>
       </Button>
     </div>

@@ -25,6 +25,7 @@ export type Post = {
   category: string;
   cover: string;
   authorId: string;
+  authorName?: string;
   date: string;
   readTime: number;
   likes: number;

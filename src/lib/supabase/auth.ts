@@ -1,10 +1,14 @@
 import { supabase } from "./client";
 
 export async function signUp(email: string, password: string, name: string) {
+  const redirectTo = `${window.location.origin}/auth/callback`;
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { name } },
+    options: {
+      data: { name },
+      emailRedirectTo: redirectTo,
+    },
   });
   if (error) throw error;
   return data;

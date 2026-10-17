@@ -1,0 +1,1 @@
+import{r as e}from"./useRouter-jReI_Skg.js";import{t}from"./auth-BxDsKmqz.js";var n=e(),r=()=>(0,n.jsx)(t,{signup:!0});export{r as component};

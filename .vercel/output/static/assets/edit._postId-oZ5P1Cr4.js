@@ -1,0 +1,1 @@
+import{r as e}from"./useRouter-jReI_Skg.js";import{t}from"./editor-B6Txzxvh.js";import{r as n}from"./index-LO7TxYVG.js";var r=e();function i(){let{postId:e}=n.useParams();return(0,r.jsx)(t,{postId:e},e)}export{i as component};

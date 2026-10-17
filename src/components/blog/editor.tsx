@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Send, Save, Image, Eye, Pencil } from "lucide-react";
+import { ArrowLeft, Send, Save, Image, Eye, Pencil, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { categories, covers, type Post } from "@/lib/blog/data";
 import { useBlog } from "@/lib/blog/context";
@@ -14,11 +14,28 @@ export function Editor({ postId }: { postId?: string }) {
   const [content, setContent] = useState(existing?.content ?? "");
   const [category, setCategory] = useState(existing?.category ?? "Lifestyle");
   const [cover, setCover] = useState(existing?.cover ?? covers.desk);
+  const [coverIsUpload, setCoverIsUpload] = useState(false);
   const [preview, setPreview] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    setCover(url);
+    setCoverIsUpload(true);
+  }
+
+  function clearUpload() {
+    setCover(covers.desk);
+    setCoverIsUpload(false);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
   const [error, setError] = useState("");
+  if (!user) return <EmptyState text="You need to be logged in to write a story." action={{ label: "Log in", to: "/login" }} />;
   if (postId && !existing) return <EmptyState text="This story isn't available." />;
-  if (existing && existing.authorId !== (user?.id ?? "emma"))
-    return <EmptyState text="You can only edit your own demo stories." />;
+  if (existing && existing.authorId !== user.id)
+    return <EmptyState text="You can only edit your own stories." />;
   function save(status: Post["status"]) {
     if (!title.trim() || !content.trim()) {
       setError("Add a title and some story content before saving.");
@@ -32,7 +49,8 @@ export function Editor({ postId }: { postId?: string }) {
       content: content.trim(),
       category,
       cover,
-      authorId: user?.id ?? "emma",
+      authorId: user.id,
+      authorName: user.name,
       date: existing?.date ?? "Oct 13, 2026",
       readTime: Math.max(1, Math.ceil(content.trim().split(/\s+/).length / 200)),
       likes: existing?.likes ?? 0,
@@ -122,6 +140,30 @@ export function Editor({ postId }: { postId?: string }) {
               <span className="field-label">
                 <Image size={15} /> Cover image
               </span>
+              <div className="cover-upload-area">
+                {coverIsUpload ? (
+                  <div className="cover-upload-preview">
+                    <img src={cover} alt="Uploaded cover" />
+                    <button className="cover-upload-remove" onClick={clearUpload} aria-label="Remove cover">
+                      <X size={14} />
+                    </button>
+                  </div>
+                ) : (
+                  <button className="cover-upload-btn" onClick={() => fileInputRef.current?.click()}>
+                    <Upload size={20} />
+                    <span>Upload cover image</span>
+                    <span className="cover-upload-hint">JPG, PNG, WEBP · max 5 MB</span>
+                  </button>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="sr-only"
+                  onChange={handleFileUpload}
+                />
+              </div>
+              <div className="cover-picker-label">Or pick a preset</div>
               <div className="cover-picker">
                 {Object.entries(covers).map(([key, image]) => (
                   <Button
@@ -129,8 +171,8 @@ export function Editor({ postId }: { postId?: string }) {
                     variant="ghost"
                     aria-label={`Use ${key} cover`}
                     aria-pressed={cover === image}
-                    onClick={() => setCover(image)}
-                    className={cover === image ? "cover-option cover-selected" : "cover-option"}
+                    onClick={() => { setCover(image); setCoverIsUpload(false); }}
+                    className={!coverIsUpload && cover === image ? "cover-option cover-selected" : "cover-option"}
                   >
                     <img src={image} alt={key} width={100} height={70} />
                   </Button>
