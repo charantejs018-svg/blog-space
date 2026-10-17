@@ -5,17 +5,32 @@
 //     React/TanStack dedupe, error logger plugins, and sandbox detection (port/host/strictPort).
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import { readFileSync } from "fs";
+import { resolve } from "path";
+
+// Inline tslib at bundle time so Vercel never needs to resolve it at runtime
+const tslibCode = readFileSync(resolve("node_modules/tslib/tslib.es6.mjs"), "utf8");
+const inlineTslib = {
+  name: "inline-tslib",
+  resolveId(id: string) {
+    if (id === "tslib") return "\0tslib-inline";
+  },
+  load(id: string) {
+    if (id === "\0tslib-inline") return tslibCode;
+  },
+};
 
 export default defineConfig({
   tanstackStart: {
-    // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
-    // nitro/vite builds from this
     server: { entry: "server" },
+  },
+  vite: {
+    plugins: [inlineTslib],
   },
   nitro: {
     preset: "vercel",
     rollupConfig: {
-      external: [],
+      plugins: [inlineTslib],
     },
     noExternal: [
       "tslib",
