@@ -1,20 +1,37 @@
-import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
+import { readdirSync, existsSync, readFileSync, writeFileSync } from "fs";
 import { resolve } from "path";
 
 const funcDir = resolve(".vercel/output/functions/__server.func");
 const libsDir = resolve(funcDir, "_libs");
-const tslibSrc = resolve("node_modules/tslib");
-const tslibDest = resolve(libsDir, "node_modules/tslib");
 
-// Fix 1: copy tslib so _libs/*.mjs can resolve it
-if (existsSync(libsDir) && existsSync(tslibSrc)) {
-  mkdirSync(resolve(libsDir, "node_modules"), { recursive: true });
-  cpSync(tslibSrc, tslibDest, { recursive: true });
-  console.log("✓ tslib copied into _libs/node_modules/");
+// Inline __awaiter so no external tslib package is needed at runtime
+const TSLIB_INLINE = `
+function __awaiter(thisArg, _arguments, P, generator) {
+  function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+  return new (P || (P = Promise))(function (resolve, reject) {
+    function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+    function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+    function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+    step((generator = generator.apply(thisArg, _arguments || [])).next());
+  });
+}
+`;
+
+// Fix 1: replace bare "tslib" imports with inlined implementations in all _libs/*.mjs
+if (existsSync(libsDir)) {
+  for (const file of readdirSync(libsDir)) {
+    if (!file.endsWith(".mjs")) continue;
+    const filePath = resolve(libsDir, file);
+    let src = readFileSync(filePath, "utf8");
+    if (!src.includes('from "tslib"')) continue;
+    // Remove the import line and prepend the inline implementation
+    src = src.replace(/^import\s*\{[^}]+\}\s*from\s*["']tslib["'];?\n?/m, "");
+    src = TSLIB_INLINE + src;
+    writeFileSync(filePath, src);
+    console.log(`✓ tslib inlined in ${file}`);
+  }
 } else {
-  console.warn("⚠ Could not find _libs or tslib — skipping fix");
-  console.warn("  libsDir exists:", existsSync(libsDir));
-  console.warn("  tslibSrc exists:", existsSync(tslibSrc));
+  console.warn("⚠ _libs dir not found — skipping tslib inline");
 }
 
 // Fix 2: downgrade runtime from nodejs24.x to nodejs22.x (Vercel max supported)
